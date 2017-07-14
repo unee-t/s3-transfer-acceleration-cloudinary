@@ -29,21 +29,19 @@ var createPolicy = function () {
   }
 }
 
-var test = 'foobar'
 var s3stuff = createPolicy()
-console.log(s3stuff)
 
 app.get('/', function (req, res) {
   res.send(`<!DOCTYPE html>
     <html>
     <head>
-    <title>${test}</title>
+    <title>🚀Amazon S3 Transfer Acceleration</title>
     <meta name=viewport content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <style>
     body, input[type=submit] { font-family: "Helvetica Neue",Helvetica,Arial,sans-serif; font-size: x-large; }
     .inputs { display: flex; flex-direction: column; align-items: left; justify-content: left; }
-    label { padding: 1em; margin: 0.3em; border: thick solid black; }
+    label { padding: 1em; margin: 0.3em; border: thick solid #0099CC; }
     </style>
     <script>
     function fileSelected() {
@@ -70,7 +68,7 @@ app.get('/', function (req, res) {
         var fileSize = 0;
         if (file.size > 1024 * 1024) fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';else fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
 
-        document.getElementById('fileName').innerHTML = '<a href=https://unee-t-media.s3-accelerate.amazonaws.com/' + key + '>Name: ' + key + '</a>';
+        document.getElementById('fileName').innerHTML = '<a href=https://${config.bucket}.s3-accelerate.amazonaws.com/' + key + '>Name: ' + key + '</a>';
         document.getElementById('fileSize').innerHTML = 'Size: ' + fileSize;
         document.getElementById('fileType').innerHTML = 'Type: ' + file.type;
       }
@@ -86,7 +84,7 @@ app.get('/', function (req, res) {
       fd.append('Content-Type', file.type);
       fd.append("file", f.files[0]);
 
-      fetch('https://unee-t-media.s3-accelerate.amazonaws.com', { method: "POST", mode: 'no-cors', body: fd }).then(function (res) {
+      fetch('https://${config.bucket}.s3-accelerate.amazonaws.com', { method: "POST", body: fd }).then(function (res) {
         if (res.ok) {
           console.log("Successfully uploaded")
         } else {

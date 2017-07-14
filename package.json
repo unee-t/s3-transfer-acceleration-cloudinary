@@ -1,12 +1,12 @@
 {
-  "name": "s3-post-example",
+  "name": "s3-transfer-acceleration-demo",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Kai Hendry <hendry+unee-t-media@iki.fi>",
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.3"
