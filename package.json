@@ -9,6 +9,7 @@
   "author": "Kai Hendry <hendry+unee-t-media@iki.fi>",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.226.1",
     "express": "^4.15.3"
   }
 }

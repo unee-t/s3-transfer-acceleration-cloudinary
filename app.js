@@ -1,37 +1,29 @@
 var express = require('express')
-var crypto = require('crypto')
-var config = require('./config.json')
+var AWS = require('aws-sdk')
+var config = { bucket: 'dev-media-unee-t' }
+
+// https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html
+// var credentials = new AWS.SharedIniFileCredentials({profile: 'uneet-dev'});
+// AWS.config.credentials = credentials;
+
+AWS.config.region = 'ap-southeast-1'
+
+var ymd = new Date().toISOString().slice(0, 10)
+
+var S3 = new AWS.S3()
 
 var app = express()
 
-var createPolicy = function () {
-  var _date = new Date()
-  // The policy object
-  var policy = {
-    // Set the expiration date 1 hour to the future
-    expiration: '' + (_date.getFullYear()) + '-' + (_date.getMonth() + 1) + '-' + (_date.getDate()) + 'T' + (_date.getHours() + 1) + ':' + (_date.getMinutes()) + ':' + (_date.getSeconds()) + 'Z',
-    conditions: [
-      { bucket: config.bucket },
-      { acl: 'public-read' },
-      ['starts-with', '$key', ''],
-      ['starts-with', '$Content-Type', '']
-    ]
-  }
-
-  // Base64 encoding
-  policy = new Buffer(JSON.stringify(policy)).toString('base64')
-
-  var signature = crypto.createHmac('sha1', config.secretAccessKey).update(policy).digest('base64')
-
-  return {
-    signature: signature,
-    policy: policy
-  }
-}
-
-var s3stuff = createPolicy()
-
 app.get('/', function (req, res) {
+  const params = {
+    Bucket: config.bucket,
+    Conditions: [['starts-with', '$key', ymd + '/']]
+  }
+
+  // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#createPresignedPost-property
+  const presigned = S3.createPresignedPost(params)
+  console.log(presigned)
+
   res.send(`<!DOCTYPE html>
     <html>
     <head>
@@ -48,9 +40,9 @@ app.get('/', function (req, res) {
 
       f = document.getElementById("file");
       var file = f.files[0];
+      var ymd = new Date().toISOString().slice(0, 10);
 
       if (file) {
-        var ymd = new Date().toISOString().slice(0, 10);
 
         if (file.name == "image.jpeg") {
           // For IOS to have a unique filename
@@ -68,21 +60,28 @@ app.get('/', function (req, res) {
         var fileSize = 0;
         if (file.size > 1024 * 1024) fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';else fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
 
-        document.getElementById('fileName').innerHTML = '<a href=https://${config.bucket}.s3-accelerate.amazonaws.com/' + key + '>Name: ' + key + '</a>';
+        document.getElementById('fileName').innerHTML = '<a href=https://${
+  config.bucket
+}.s3-accelerate.amazonaws.com/' + key + '>Name: ' + key + '</a>';
         document.getElementById('fileSize').innerHTML = 'Size: ' + fileSize;
         document.getElementById('fileType').innerHTML = 'Type: ' + file.type;
       }
 
       var fd = new FormData();
 
-      fd.append('AWSAccessKeyId', '${config.accessKeyId}');
-      fd.append('policy', '${s3stuff.policy}');
-      fd.append('signature', '${s3stuff.signature}');
-
       fd.append('key', key);
       fd.append('acl', 'public-read');
       fd.append('Content-Type', file.type);
       fd.append("file", f.files[0]);
+      fd.append('signature', "${presigned.fields['X-Amz-Signature']}");
+
+      // https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
+
+      fd.append('policy', '${presigned.fields.Policy}');
+      fd.append('X-Amz-Signature', "${presigned.fields['X-Amz-Signature']}");
+      fd.append('X-Amz-Credential', "${presigned.fields['X-Amz-Credential']}");
+      fd.append('X-Amz-Algorithm', "${presigned.fields['X-Amz-Algorithm']}");
+      fd.append('X-Amz-Date', "${presigned.fields['X-Amz-Date']}");
 
       fetch('https://${config.bucket}.s3-accelerate.amazonaws.com', { method: "POST", body: fd }).then(function (res) {
         if (res.ok) {
@@ -103,7 +102,7 @@ app.get('/', function (req, res) {
 
         <form class=inputs onsubmit="return fileSelected(this);">
         <label><strong>Optional:</strong> Upload file name 
-        <input type=text pattern="[a-z]+" id=filename autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label>
+        <input type=text id=filename autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label>
         <label>Upload file <input type=file required id=file></label>
         <input type=submit value="Upload">
         </form>
@@ -112,5 +111,5 @@ app.get('/', function (req, res) {
         </html>`)
 })
 
-app.listen(8080)
-console.log('Server is listening to port 8080')
+const { PORT = 3000 } = process.env
+app.listen(PORT)
