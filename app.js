@@ -57,14 +57,6 @@ app.get('/', function (req, res) {
           var key = ymd + '/' + filename + '.' + file.name.split('.').pop();
         }
 
-        var fileSize = 0;
-        if (file.size > 1024 * 1024) fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';else fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
-
-        document.getElementById('fileName').innerHTML = '<a href=https://${
-  config.bucket
-}.s3-accelerate.amazonaws.com/' + key + '>Name: ' + key + '</a>';
-        document.getElementById('fileSize').innerHTML = 'Size: ' + fileSize;
-        document.getElementById('fileType').innerHTML = 'Type: ' + file.type;
       }
 
       var fd = new FormData();
@@ -89,7 +81,8 @@ app.get('/', function (req, res) {
         } else {
           console.error("Fail", res)
         }
-      })
+      }).catch(error => console.log(error) );
+
         return false;
     }
         </script>

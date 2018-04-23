@@ -1,0 +1,5 @@
+{
+  "name": "s3demo",
+  "profile": "uneet-dev",
+  "error_pages": { "disable": true }
+}
