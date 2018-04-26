@@ -17,7 +17,10 @@ var app = express()
 app.get('/', function (req, res) {
   const params = {
     Bucket: config.bucket,
-    Conditions: [['starts-with', '$key', ymd + '/']]
+    Conditions: [
+      ['starts-with', '$key', ymd + '/'],
+      {'acl': 'public-read'},
+      ['starts-with', '$Content-Type', '']]
   }
 
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#createPresignedPost-property
@@ -64,8 +67,6 @@ app.get('/', function (req, res) {
       fd.append('key', key);
       fd.append('acl', 'public-read');
       fd.append('Content-Type', file.type);
-      fd.append("file", f.files[0]);
-      fd.append('signature', "${presigned.fields['X-Amz-Signature']}");
 
       // https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
 
@@ -74,6 +75,8 @@ app.get('/', function (req, res) {
       fd.append('X-Amz-Credential', "${presigned.fields['X-Amz-Credential']}");
       fd.append('X-Amz-Algorithm', "${presigned.fields['X-Amz-Algorithm']}");
       fd.append('X-Amz-Date', "${presigned.fields['X-Amz-Date']}");
+
+      fd.append("file", f.files[0]);
 
       fetch('https://${config.bucket}.s3-accelerate.amazonaws.com', { method: "POST", body: fd }).then(function (res) {
         if (res.ok) {
@@ -94,7 +97,7 @@ app.get('/', function (req, res) {
         <div id="fileType"></div>
 
         <form class=inputs onsubmit="return fileSelected(this);">
-        <label><strong>Optional:</strong> Upload file name 
+        <label><strong>Optional:</strong> Upload file name
         <input type=text id=filename autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label>
         <label>Upload file <input type=file required id=file></label>
         <input type=submit value="Upload">
