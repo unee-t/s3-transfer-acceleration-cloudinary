@@ -2,9 +2,9 @@ var express = require('express')
 var AWS = require('aws-sdk')
 var config = { bucket: 'dev-media-unee-t' }
 
-// https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html
-// var credentials = new AWS.SharedIniFileCredentials({profile: 'uneet-dev'});
-// AWS.config.credentials = credentials;
+// https:// docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html
+// var credentials = new AWS.SharedIniFileCredentials({profile: 'uneet-dev'})
+// AWS.config.credentials = credentials
 
 AWS.config.region = 'ap-southeast-1'
 
@@ -20,12 +20,13 @@ app.get('/', function (req, res) {
     Conditions: [
       ['starts-with', '$key', ymd + '/'],
       {'acl': 'public-read'},
-      ['starts-with', '$Content-Type', '']]
+      ['starts-with', '$Content-Type', '']
+    ]
   }
 
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#createPresignedPost-property
   const presigned = S3.createPresignedPost(params)
-  console.log(presigned)
+  // console.log(presigned)
 
   res.send(`<!DOCTYPE html>
     <html>
