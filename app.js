@@ -3,10 +3,9 @@ var AWS = require('aws-sdk')
 var config = { bucket: 'dev-media-unee-t' }
 
 // https:// docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html
-var credentials = new AWS.SharedIniFileCredentials({profile: 'uneet-dev'})
-AWS.config.credentials = credentials
-
-AWS.config.region = 'ap-southeast-1'
+// var credentials = new AWS.SharedIniFileCredentials({profile: 'uneet-dev'})
+// AWS.config.credentials = credentials
+// AWS.config.region = 'ap-southeast-1'
 
 var ymd = new Date().toISOString().slice(0, 10)
 
@@ -41,7 +40,7 @@ app.get('/', function (req, res) {
     </style>
 
     <script>
-    async function fileSelected() {
+    function fileSelected() {
 
       f = document.getElementById("file");
       var file = f.files[0];
@@ -81,10 +80,22 @@ app.get('/', function (req, res) {
       fd.append("file", f.files[0]);
 
       // TODO: Track progress https://twitter.com/kaihendry/status/989316219747557376
-      const response = await fetch('https://${config.bucket}.s3-accelerate.amazonaws.com', { method: "POST", body: fd })
-      if (response.ok) {
+
+      // const response = await fetch('https://${config.bucket}.s3-accelerate.amazonaws.com', { method: "POST", body: fd })
+      // if (response.ok) {
+      //     console.log("Successfully uploaded")
+      //   } else { console.log("Fail", response) }
+
+      fetch('https://${config.bucket}.s3-accelerate.amazonaws.com', { method: "POST", body: fd }).then(function (res) {
+        if (res.ok) {
           console.log("Successfully uploaded")
-        } else { console.log("Fail", response) }
+        } else {
+          console.log("Fail", res)
+        }
+      }).catch(error => console.log("Error", error.message ));
+
+      return false;
+
       }
         </script>
         </head>
@@ -104,6 +115,7 @@ app.get('/', function (req, res) {
         </form>
 
         <!-- stupid logger from https://stackoverflow.com/a/45387558/4534 -->
+        <!-- seems unable to handle error object properly -->
         <script>
         !function(o){console.old=console.log,console.log=function(){var n,e,t="";for(e=0;e<arguments.length;e++)t+='<span class="log-'+typeof(n=arguments[e])+'">',"object"==typeof n&&"object"==typeof JSON&&"function"==typeof JSON.stringify?t+=JSON.stringify(n):t+=n,t+="</span>&nbsp;";o.innerHTML+=t+"<br>",console.old.apply(void 0,arguments)}}
         (document.getElementById("logger"));
