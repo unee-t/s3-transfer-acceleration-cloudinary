@@ -25,6 +25,7 @@ app.get('/', function (req, res) {
 
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#createPresignedPost-property
   const presigned = S3.createPresignedPost(params)
+  console.log(presigned)
 
   res.send(`<!DOCTYPE html>
     <html>
@@ -76,6 +77,7 @@ app.get('/', function (req, res) {
       fd.append('X-Amz-Credential', "${presigned.fields['X-Amz-Credential']}");
       fd.append('X-Amz-Algorithm', "${presigned.fields['X-Amz-Algorithm']}");
       fd.append('X-Amz-Date', "${presigned.fields['X-Amz-Date']}");
+      fd.append('X-Amz-Security-Token', "${presigned.fields['X-Amz-Security-Token']}")
 
       fd.append("file", f.files[0]);
 
