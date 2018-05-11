@@ -125,6 +125,8 @@ app.get('/', function (req, res) {
         (document.getElementById("logger"));
         </script>
 
+        <p><a href="https://github.com/unee-t/s3-transfer-acceleration-cloudinary">Source code</a></p>
+
         </body>
         </html>`)
 })
