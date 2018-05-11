@@ -1,5 +1,8 @@
 {
-  "name": "s3demo",
-  "profile": "uneet-dev",
-  "error_pages": { "disable": true }
+	"name": "s3demo",
+	"profile": "uneet-dev",
+	"error_pages": { "disable": true },
+	"environment": {
+		"BUCKET": "dev-media-unee-t"
+	}
 }

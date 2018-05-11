@@ -1,11 +1,13 @@
 var express = require('express')
 var AWS = require('aws-sdk')
-var config = { bucket: 'dev-media-unee-t' }
+var config = { bucket: process.env.BUCKET }
 
 // https:// docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html
+// If you want to run locally, i.e not in the context of an IAM role
 // var credentials = new AWS.SharedIniFileCredentials({profile: 'uneet-dev'})
 // AWS.config.credentials = credentials
 // AWS.config.region = 'ap-southeast-1'
+// ... CAVEAT: presigned.fields will be different ! https://stackoverflow.com/questions/50226877
 
 var ymd = new Date().toISOString().slice(0, 10)
 
@@ -35,7 +37,7 @@ app.get('/', function (req, res) {
     <meta name="robots" content="noindex">
 
     <style>
-    body, input[type=submit] { font-family: "Helvetica Neue",Helvetica,Arial,sans-serif; font-size: x-large; }
+    body, input[type=submit] { font-family: "Helvetica Neue", sans-serif; font-size: x-large; }
     .inputs { display: flex; flex-direction: column; align-items: left; justify-content: left; }
     label { padding: 1em; margin: 0.3em; border: thick solid #0099CC; }
     </style>
